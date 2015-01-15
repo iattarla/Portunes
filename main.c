@@ -34,13 +34,11 @@ static unsigned long __wiegandBitCount; // number of bits currently captured
 static struct timespec __wiegandBitTime; // timestamp of the last bit received (used for timeouts)
 char* door_name = "main door";
 
-  MYSQL *conn;
-  MYSQL_RES *res;
-  MYSQL_ROW row;
-  char *server = "localhost";
-  char *user = "root";
-  char *password = "123456"; /* set me first */
-  char *database = "personnel_test";
+
+char *server = "92.61.14.199";
+char *user = "testuser";
+char *password = "123456"; /* set me first */
+char *database = "personnel_test";
 
 
 void data0Pulse(void) {
@@ -123,20 +121,160 @@ void printCharAsBinary(unsigned char ch) {
   }
 }
 
-shift_control(char card_no){
+char* shift_control(char* card_no){
+  MYSQL *conn;
+  MYSQL_RES *res;
+  MYSQL_ROW row;  
+  
+  //date and time variables
+  struct tm *timeinfo ;
+  time_t rawtime ;
+  char currentDate[11];
 
-  char *query = "SELECT card_no from personnel_control where card_no='%s'";
 
-  sprintf(query,query,card_no);
+  rawtime = time (NULL) ;
+  timeinfo = localtime(&rawtime);
+  
+  strftime(currentDate,11,"%Y-%m-%d",timeinfo);
 
-  if (mysql_query(conn,query ),card_no) { //show tables
-  fprintf(stderr, "%s\n", mysql_error(conn));
+  conn = mysql_init(NULL);
+  
+  if (!mysql_real_connect(conn, server,
+			  user, password, database, 0, NULL, 0)) {
+    fprintf(stderr, "%s\n", mysql_error(conn));
     //exit(1);
- }
- res = mysql_use_result(conn);
+  }
+
+  char query[250];
+
+  //control for personnel did out today if true return already out
+  sprintf(query,"SELECT EXISTS(SELECT card_no FROM door_control WHERE card_no='%s' AND enter_date='%s' AND shift='end')",card_no,currentDate);
+  
+  if (mysql_query(conn, query)){
+    //finish_with_error(conn);
+    fprintf(stderr, "%s\n", mysql_error(conn));
+  }
+
+  res = mysql_use_result(conn);
+ 
+  row = mysql_fetch_row(res);
+
+  if(strcmp(row[0],"1") == 0){
+    puts("personnel already out today");
+    return "out";
+  } 
+
+  //CONTROL FOR personnel did enter today 
+  sprintf(query,"SELECT EXISTS(SELECT card_no FROM door_control WHERE card_no='%s' AND enter_date='%s')",card_no,currentDate);
+  
+  if (mysql_query(conn, query)){
+    //finish_with_error(conn);
+    fprintf(stderr, "%s\n", mysql_error(conn));
+  }
+
+  res = mysql_use_result(conn);
+ 
+  row = mysql_fetch_row(res);
+
+    
+  if(strcmp(row[0],"1") == 0){ // if column exist mysql return 1
+    return "end";
+    puts("end");
+  }else{
+    return "start";
+    puts("start");
+  } 
+ 
+  mysql_free_result(res);
+  mysql_close(conn);
+ 
 }
 ////////////
+
+int personnel_exist(char* card_no){
+
+  MYSQL *conn;
+  MYSQL_RES *res;
+  MYSQL_ROW row;  
+  
+  conn = mysql_init(NULL);
+  
+  if (!mysql_real_connect(conn, server,
+			  user, password, database, 0, NULL, 0)) {
+    fprintf(stderr, "%s\n", mysql_error(conn));
+    //exit(1);
+  }
+
+  char query[250];
+
+  sprintf(query,"SELECT EXISTS(SELECT * FROM personnel WHERE card_no='%s')",card_no);
+  
+  if (mysql_query(conn, query)){
+    //finish_with_error(conn);
+    fprintf(stderr, "%s\n", mysql_error(conn));
+  }
+
+  res = mysql_use_result(conn);
+ 
+  row = mysql_fetch_row(res);
+    
+  if(strcmp(row[0],"1") == 0){ // if column exist mysql return 1
+    puts("exist");
+    return 1;
+  }else{
+    return 0;
+    puts("not exist");
+  } 
+ 
+  mysql_free_result(res);
+  mysql_close(conn);
+   
+}
+/////////////
+void print_table(){
+  MYSQL *conn;
+  MYSQL_RES *res;
+  MYSQL_ROW row;
+
+
+  conn = mysql_init(NULL);
+  
+  /* Connect to database */
+  
+  if (!mysql_real_connect(conn, server,
+			  user, password, database, 0, NULL, 0)) {
+    fprintf(stderr, "%s\n", mysql_error(conn));
+    //exit(1);
+  }
+
+  //////////////////////////////////////for debug
+  /* send SQL query */
+  if (mysql_query(conn, "SELECT * from door_control")) { //show tables
+    fprintf(stderr, "%s\n", mysql_error(conn));
+    //exit(1);
+  }
+  res = mysql_use_result(conn);
+  
+  /* output table name */
+  printf("door control table data:\n");
+  while ((row = mysql_fetch_row(res)) != NULL){
+    
+    printf("%s %s %s %s %s %s \n", row[0],row[1],row[2],row[3],row[4],row[5]);
+    
+  }
+
+  /////////////////////////////////////end of debug
+
+  /* close connection */
+  mysql_free_result(res);
+  mysql_close(conn);
+}
+////
 void send_mysql_data(void *card_no) {
+  MYSQL *conn;
+  MYSQL_RES *res;
+  MYSQL_ROW row;
+
   //date and time variables
   struct tm *timeinfo ;
   time_t rawtime ;
@@ -157,58 +295,39 @@ void send_mysql_data(void *card_no) {
     fprintf(stderr, "%s\n", mysql_error(conn));
     //exit(1);
   }
-  printf("build query\n");
-  
+ 
+  // Build date and time from format
   strftime(currentTime,15,"%H:%M:%S",timeinfo);
   strftime(currentDate,11,"%Y-%m-%d",timeinfo); 
 
-  printf ("time:%s date:%s\n%s\n",currentTime,currentDate,strResponse) ;
+    //shift control
+    char *shift;
+
+    shift = shift_control(card_no);
+    puts(shift);
+
+
+    if( personnel_exist(card_no) && (strcmp(shift,"out") != 0) ){
+    
+    char st[250];   
+    
+    /* Build sql Query to insert data */
+    sprintf(st,"INSERT INTO door_control(card_no,door_name,shift,enter_date,enter_time) VALUES('%s','%s','%s','%s','%s')",card_no,door_name,shift,currentDate,currentTime);
+  
+  
+    if (mysql_real_query(conn, st, strlen(st) ) ){
+      //finish_with_error(conn);
+      fprintf(stderr, "%s\n", mysql_error(conn));
+    }
+
+    print_table();
+  }else{
+    puts("you have not permission to enter");
+  }
  
-  
-
-  //char *card_no = "222";
-  //shift control
-  
-  char *shift = "start";
-
-  char st[250]; //= "INSERT INTO personnel_control(card_no,date,time) VALUES('%s','%s','%s')";
-  
-  
-  sprintf(st,"INSERT INTO personnel_control(card_no,door_name,shift,date,time) VALUES('%s','%s','%s','%s','%s')",card_no,door_name,shift,currentDate,currentTime);
-  
-  int st_len = strlen(st);
-  
-  
-  
-  //char query[st_l];
-  
-  //int len = snprintf(query,st_len + strlen(card_no) , st, chunk);
-  printf("sql query:\n%s\n----------\n",st);
-  
-  int len = strlen(st);
-  
-  if (mysql_real_query(conn, st, len)){
-    //finish_with_error(conn);
-    fprintf(stderr, "%s\n", mysql_error(conn));
-  }
-  
-  /* send SQL query */
-  if (mysql_query(conn, "SELECT * from personnel_control")) { //show tables
-    fprintf(stderr, "%s\n", mysql_error(conn));
-    //exit(1);
-  }
-  res = mysql_use_result(conn);
-  
-  /* output table name */
-  printf("door control table data:\n");
-  while ((row = mysql_fetch_row(res)) != NULL){
-    
-    printf("%s %s %s %s %s \n", row[0],row[1],row[2],row[3],row[4]);
-    
-  }
   /* close connection */
-  mysql_free_result(res);
-  mysql_close(conn);
+  //mysql_free_result(res);
+  //mysql_close(conn);
 } 
 ///////////
 void main(void) {
@@ -248,6 +367,7 @@ void main(void) {
       for (i = 0; i < bytes; i++)
 	printCharAsBinary(data[i]);
       printf("\n");
+
       
       send_mysql_data(datahex);
       
