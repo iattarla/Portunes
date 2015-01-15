@@ -5,8 +5,8 @@ CREATE TABLE `personnel_test`.`door_control` (
   `card_no` VARCHAR(45) NULL,
   `door_name` VARCHAR(45) NULL,
   `shift` VARCHAR(10) NULL,
-  `date` DATE NULL,
-  `time` TIME NULL,
+  `enter_date` DATE NULL,
+  `enter_time` TIME NULL,
   PRIMARY KEY (`id`));
 
 
