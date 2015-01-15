@@ -9,6 +9,7 @@ In ancient Roman religion, Portunes (alternatively spelled Portumnes or Portunus
 
 ### Compile
 `gcc -o portunes.out main.c -lpthread -lwiringPi -lrt $(mysql_config --cflags) $(mysql_config --libs)`
+
 you can also use compileandrun.sh script
 
 ### Need to compile
