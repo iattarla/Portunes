@@ -17,4 +17,12 @@ CREATE TABLE `personnel_test`.`personnel` (
   `surname` VARCHAR(45) NULL,
   PRIMARY KEY (`id`));
 
+CREATE TABLE `personnel_test`.`door_logs` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `door_name` VARCHAR(45) NULL,
+  `card_no` VARCHAR(45) NULL,
+  `error` VARCHAR(45) NULL,
+  `log_date` DATE NULL,
+  `log_time` TIME NULL,
+  PRIMARY KEY (`id`));
 

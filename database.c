@@ -1,18 +1,57 @@
-#include <mysql.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <wiringPi.h>
+/************************************************************************
+* Portunes v.0.0.2
+*
+*
+* Mysql database connection definitions
+*
+*
+* Copyright (c) 2015
+*
+*
+*************************************************************************/
+
+
 #include "wiegand.h"
+#include "database.h"
+
 
 char* door_name = "main door";
-
-
 char *server = "92.61.14.199";
 char *user = "testuser";
 char *password = "123456"; /* set me first */
 char *database = "personnel_test";
+
+
+
+void report_log(char* door_name,char* card_no,char* error,char* date,char* time){
+
+  MYSQL *conn;
+  MYSQL_RES *res;
+  MYSQL_ROW row;  
+  
+  conn = mysql_init(NULL);
+  
+  if (!mysql_real_connect(conn, server,
+			  user, password, database, 0, NULL, 0)) {
+    fprintf(stderr, "%s\n", mysql_error(conn));
+    //exit(1);
+  }
+
+  char st[250];   
+    
+  /* Build sql Query to insert data */
+  sprintf(st,"INSERT INTO door_logs(door_name,card_no,error,log_date,log_time) VALUES('%s','%s','%s','%s','%s')",door_name,card_no,error,date,time);
+  
+  
+  if (mysql_real_query(conn, st, strlen(st) ) ){
+    //finish_with_error(conn);
+    fprintf(stderr, "%s\n", mysql_error(conn));
+  }
+
+  mysql_free_result(res);
+  mysql_close(conn);
+   
+}
 
 char* shift_control(char* card_no){
   MYSQL *conn;
@@ -224,18 +263,21 @@ void send_mysql_data(void *card_no) {
       //finish_with_error(conn);
       fprintf(stderr, "%s\n", mysql_error(conn));
     }
-
+    report_log(door_name,card_no,"no error",currentDate,currentTime);
     print_table();
   }else{
       if((strcmp(shift,"out") != 0)){
 	puts("you have not permission to enter");
+	report_log(door_name,card_no,"permission denied",currentDate,currentTime);
         
 	digitalWrite (BUZZER_PIN, LOW) ; 
 	delay (500) ;
 	digitalWrite (BUZZER_PIN,  HIGH);
       }
-      else
+      else{
 	puts("personnel already out today");
+	report_log(door_name,card_no,"personnel out",currentDate,currentTime);
+      }
   }
  
   /* close connection */
