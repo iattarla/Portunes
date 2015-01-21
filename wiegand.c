@@ -6,6 +6,9 @@
 
 #define WIEGANDMAXDATA 32
 #define WIEGANDTIMEOUT 3000000
+
+#define BUZZER_PIN 4
+#define LED_PIN 5
  
 static unsigned char __wiegandData[WIEGANDMAXDATA]; // can capture upto 32 bytes of data -- FIXME: Make this dynamically allocated in init?
 static unsigned long __wiegandBitCount; // number of bits currently captured
@@ -36,8 +39,12 @@ int wiegandInit(int d0pin, int d1pin) {
   wiringPiSetup() ;
   pinMode(d0pin, INPUT);
   pinMode(d1pin, INPUT);
-  pinMode (7, OUTPUT) ; // for buzzer to biip when permission denied
- 
+  pinMode (BUZZER_PIN, OUTPUT); // for buzzer to biip when permission denied
+  pinMode (LED_PIN, OUTPUT);
+
+  digitalWrite(BUZZER_PIN,HIGH);
+  digitalWrite(LED_PIN,HIGH);
+
   wiringPiISR(d0pin, INT_EDGE_FALLING, data0Pulse);
   wiringPiISR(d1pin, INT_EDGE_FALLING, data1Pulse);
   

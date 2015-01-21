@@ -4,6 +4,7 @@
 #include <string.h>
 #include <time.h>
 #include <wiringPi.h>
+#include "wiegand.h"
 
 char* door_name = "main door";
 
@@ -229,9 +230,9 @@ void send_mysql_data(void *card_no) {
       if((strcmp(shift,"out") != 0)){
 	puts("you have not permission to enter");
         
-	digitalWrite (7, LOW) ; 
+	digitalWrite (BUZZER_PIN, LOW) ; 
 	delay (500) ;
-	digitalWrite (7,  HIGH);
+	digitalWrite (BUZZER_PIN,  HIGH);
       }
       else
 	puts("personnel already out today");
