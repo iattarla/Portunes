@@ -3,8 +3,6 @@
 /************************************************************************
 * Portunes v.0.0.2
 *
-* 
-* this program use wiegand code written by Kyle Mallory
 *
 * compile with gcc -o rfid rfid.c -lpthread -lwiringPi -lrt $(mysql_config --cflags) $(mysql_config --libs)
 *

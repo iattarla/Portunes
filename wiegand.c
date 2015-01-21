@@ -36,6 +36,7 @@ int wiegandInit(int d0pin, int d1pin) {
   wiringPiSetup() ;
   pinMode(d0pin, INPUT);
   pinMode(d1pin, INPUT);
+  pinMode (7, OUTPUT) ; // for buzzer to biip when permission denied
  
   wiringPiISR(d0pin, INT_EDGE_FALLING, data0Pulse);
   wiringPiISR(d1pin, INT_EDGE_FALLING, data1Pulse);

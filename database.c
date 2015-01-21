@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <wiringPi.h>
 
 char* door_name = "main door";
 
@@ -225,8 +226,13 @@ void send_mysql_data(void *card_no) {
 
     print_table();
   }else{
-      if((strcmp(shift,"out") != 0))
+      if((strcmp(shift,"out") != 0)){
 	puts("you have not permission to enter");
+        
+	digitalWrite (7, LOW) ; 
+	delay (500) ;
+	digitalWrite (7,  HIGH);
+      }
       else
 	puts("personnel already out today");
   }
