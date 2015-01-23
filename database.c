@@ -15,15 +15,15 @@
 #include "database.h"
 
 
-char* door_name = "main door";
-char *server = "92.61.14.199";
-char *user = "testuser";
-char *password = "123456"; /* set me first */
-char *database = "personnel_test";
+const char *door_name;
+const char *server;
+const char *user;
+const char *password;
+const char *database;
 
 
 
-void report_log(char* door_name,char* card_no,char* error,char* date,char* time){
+void report_log(const char* door_name,char* card_no,char* error,char* date,char* time){
 
   MYSQL *conn;
   MYSQL_RES *res;
@@ -232,14 +232,15 @@ void send_mysql_data(void *card_no) {
   rawtime = time (NULL) ;
   timeinfo = localtime(&rawtime) ; 
 
-    
+  initMysql();
   conn = mysql_init(NULL);
   
   /* Connect to database */
-  
+  puts(database);
+  puts(user);
   if (!mysql_real_connect(conn, server,
 			  user, password, database, 0, NULL, 0)) {
-    fprintf(stderr, "%s\n", mysql_error(conn));
+    fprintf(stderr, "error  at connection:%s\n", mysql_error(conn));
     //exit(1);
   }
  
@@ -284,3 +285,35 @@ void send_mysql_data(void *card_no) {
   //mysql_free_result(res);
   //mysql_close(conn);
 } 
+
+int initMysql()
+{
+  
+  config_t cfg, *cf;
+  cf = &cfg;
+  config_init(cf);
+  
+  if (!config_read_file(cf, "database.config")) {
+    fprintf(stderr, "%s:%d - %s\n",
+            config_error_file(cf),
+            config_error_line(cf),
+            config_error_text(cf));
+    config_destroy(cf);
+    return(EXIT_FAILURE);
+  }
+
+  if (config_lookup_string(cf, "user", &user))
+    printf("Enabled: %s\n", user);
+
+  if (config_lookup_string(cf, "server", &server))
+    printf("Enabled: %s\n", server);
+
+  if (config_lookup_string(cf, "password", &password))
+    printf("Enabled: %s\n", password);
+
+  if (config_lookup_string(cf, "database", &database))
+    printf("Enabled: %s\n", database);
+
+  if (config_lookup_string(cf, "door_name", &door_name))
+    printf("Enabled: %s\n", door_name);
+}  

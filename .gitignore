@@ -30,3 +30,6 @@
 
 # emacs backup file
 *.c~
+
+# our config files
+*.config

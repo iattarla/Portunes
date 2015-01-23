@@ -26,6 +26,8 @@ void main(void) {
   
   wiegandInit(D0_PIN, D1_PIN);
   puts("Portunes (c) 2015 v0.0.1");
+  
+
   while(1) {
     int bitLen = wiegandGetPendingBitCount();
     
