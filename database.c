@@ -48,8 +48,8 @@ void report_log(const char* door_name,char* card_no,char* error,char* date,char*
     fprintf(stderr, "%s\n", mysql_error(conn));
   }
 
-  mysql_free_result(res);
-  mysql_close(conn);
+  //mysql_free_result(res);
+  //mysql_close(conn);
    
 }
 
@@ -271,7 +271,7 @@ void send_mysql_data(void *card_no) {
 	puts("you have not permission to enter");
 	report_log(door_name,card_no,"permission denied",currentDate,currentTime);
         
-	digitalWrite (BUZZER_PIN, LOW) ; 
+	digitalWrite (BUZZER_PIN, LOW) ; // long beep
 	delay (500) ;
 	digitalWrite (BUZZER_PIN,  HIGH);
       }
