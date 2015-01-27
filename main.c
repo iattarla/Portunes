@@ -20,6 +20,7 @@
 #define D0_PIN 0
 #define D1_PIN 1
  
+
 ///////////
 void main(void) {
   int i;
@@ -40,7 +41,7 @@ void main(void) {
       
       int bytes = bitLen / 8 + 1;
       
-      //printf("Read %d bits (%d bytes): ", bitLen, bytes);
+      printf("Read %d bits (%d bytes): ", bitLen, bytes);
       
       char datahex[200];
       char datahex2[50];
@@ -56,11 +57,13 @@ void main(void) {
       
       printf("\n");
 
-      /*print bit card no
-      for (i = 0; i < bytes; i++)
-	printCharAsBinary(data[i]);
-      printf("\n");
-      */
+      // print bit card no
+      // for (i = 0; i < bytes; i++)
+      //printCharAsBinary(data[i]);
+      //printf("\n");
+            
+      //puts("\n");
+
       
       send_mysql_data(datahex);
       

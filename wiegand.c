@@ -97,6 +97,7 @@ int wiegandReadData(void* data, int dataMaxLen) {
 
 void printCharAsBinary(unsigned char ch) {
   int i;
+
   for (i = 0; i < 8; i++) {
     printf("%d", (ch & 0x80) ? 1 : 0);
     ch <<= 1;
