@@ -43,8 +43,9 @@ public class PortunesV2 {
                         Print();
                     }
 
-                if (data0.isLow()) { // D1 on ground?
-                        s[bits++] = '0';
+                if (data0.isLow() && bits <= 26) { // D1 on ground?
+                        s[bits] = '1';
+                        bits++;
                         System.out.println(0);
                         while (data0.isLow()) {
 
@@ -61,8 +62,10 @@ public class PortunesV2 {
                         bits=0;
                         Print();
                 }
-                if (data1.isLow()) { // D1 on ground?
-                        s[bits++] = '1';
+                if (data1.isLow() && bits<=26) { // D1 on ground?
+                        s[bits] = '1';
+                        s[bits] |= 1;
+                        bits++;
                         System.out.println(1);
                         while (data1.isLow()) {
                         }
