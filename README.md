@@ -8,7 +8,7 @@ In ancient Roman religion, Portunes (alternatively spelled Portumnes or Portunus
 
 
 ### Compile
-`gcc -o portunes.out main.c -lpthread -lwiringPi -lrt $(mysql_config --cflags) $(mysql_config --libs)`
+`gcc -o portunes.out main.c -lpthread -lconfig -lwiringPi -lrt $(mysql_config --cflags) $(mysql_config --libs)`
 
 you can also use compileandrun.sh script
 
@@ -16,3 +16,7 @@ you can also use compileandrun.sh script
 - wiringPi
 - mysql-server
 - mysql-client
+- libconfig
+
+### RF-ID data format
+http://www.pagemac.com/azure/data_formats.php
