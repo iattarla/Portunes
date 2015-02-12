@@ -30,3 +30,6 @@
 
 # emacs backup file
 *.c~
+/PortunesV2/nbproject/private/
+/PortunesV2/build/
+/PortunesV2/dist/
