@@ -14,74 +14,76 @@ import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.RaspiPin;
+import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
+import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 
 
 public class PortunesV2 {
 
-
     public static char[] s = new char[10000];
     static int bits = 0;
-
-    public static void main(String[] args) {
+    
+    public static void main(String args[]) throws InterruptedException {
+        System.out.println("<--Pi4J--> GPIO Listen Example ... started.");
+        
         // create gpio controller
         final GpioController gpio = GpioFactory.getInstance();
 
-        // provision gpio pin #02 as an input pin with its internal pull down
-        // resistor enabled
-        final GpioPinDigitalInput pin0 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_00, PinPullResistance.PULL_UP);
+        // provision gpio pin #02 as an input pin with its internal pull down resistor enabled
+        final GpioPinDigitalInput data0 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_00, PinPullResistance.PULL_UP);
 
-        final GpioPinDigitalInput pin1 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_01, PinPullResistance.PULL_UP);
-
-        System.out.println("PINs ready");
-        Thread th = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-
-                while (true) {
-
-                    if (pin0.isLow()) { // D1 on ground?
-                        s[bits++] = '0';
-                        while (pin0.isLow()) {
-
-                        }
-
-                    }
-
-                    if (pin1.isLow()) { // D1 on ground?
-                        s[bits++] = '1';
-                        while (pin1.isLow()) {
-                        }
-
-                    }
-
-                    if (bits == 26) {
+        final GpioPinDigitalInput data1 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_01, PinPullResistance.PULL_UP);
+        
+        // create and register gpio pin listener
+        data0.addListener(new GpioPinListenerDigital() {
+            public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
+               
+                if (bits == 26) {
                         bits=0;
-
                         Print();
-
                     }
 
+                if (data0.isLow()) { // D1 on ground?
+                        s[bits++] = '0';
+                        while (data0.isLow()) {
+
+                        }
                 }
-
             }
+            
         });
-        th.setPriority(Thread.MAX_PRIORITY);
-        th.start();
-        System.out.println("Thread start");
+        
+        data1.addListener(new GpioPinListenerDigital() {
+            public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
+                
+                if (bits == 26) {
+                        bits=0;
+                        Print();
+                }
+                if (data1.isLow()) { // D1 on ground?
+                        s[bits++] = '1';
+                        while (data1.isLow()) {
+                        }
 
-        for (;;) {
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                    }
             }
+            
+        });
+        
+        
+        //System.out.println(" ... complete the GPIO #02 circuit and see the listener feedback here in the console.");
+        
+        // keep program running until user aborts (CTRL-C)
+        for (;;) {
+            Thread.sleep(500);
         }
-
+        
+        // stop all GPIO activity/threads by shutting down the GPIO controller
+        // (this method will forcefully shutdown all GPIO monitoring threads and scheduled tasks)
+        // gpio.shutdown();   <--- implement this method call if you wish to terminate the Pi4J GPIO controller        
     }
-
-    protected static void Print() {
+    
+  protected static void Print() {
 
         for (int i = 0; i < 26; i++) {
             System.out.write(s[i]);
