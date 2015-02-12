@@ -33,7 +33,7 @@
 <<<<<<< HEAD
 /PortunesV2/nbproject/private/
 /PortunesV2/build/
-/PortunesV2/dist/
+#/PortunesV2/dist/
 =======
 
 # our config files
