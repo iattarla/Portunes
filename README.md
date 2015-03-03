@@ -15,8 +15,9 @@ you can also use compileandrun.sh script
 ### Need to compile
 - wiringPi
 - mysql-server
+- libmysqlclient-dev
 - mysql-client
-- libconfig
+- libconfig-dev
 
 ### RF-ID data format
 http://www.pagemac.com/azure/data_formats.php
