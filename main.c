@@ -25,9 +25,8 @@ void main(void) {
   int i;
   
   wiegandInit(D0_PIN, D1_PIN);
-  puts("Portunes (c) 2015 v0.0.1");
+  //puts("Portunes (c) 2015 v0.0.1");
   
-
   while(1) {
     int bitLen = wiegandGetPendingBitCount();
     
@@ -36,6 +35,7 @@ void main(void) {
     } else {
       
       char data[100];
+
       bitLen = wiegandReadData((void *)data, 100);
       
       int bytes = bitLen / 8 + 1;
@@ -46,7 +46,7 @@ void main(void) {
       char datahex2[50];
 
       //memcpy(datahex,data,bytes);
-      printf("card no:");
+      //printf("card no:");
       for (i = 0; i < bytes; i++){
 	
 	printf("%02X",data[i]);
@@ -55,15 +55,8 @@ void main(void) {
       }
       
       printf("\n");
+      //exit(0);
 
-      /*print bit card no
-      for (i = 0; i < bytes; i++)
-	printCharAsBinary(data[i]);
-      printf("\n");
-      */
-      
-      send_mysql_data(datahex);
-      
     }
   }
 } 
