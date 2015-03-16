@@ -14,7 +14,6 @@
  
 #include <stdio.h>
 
-#include "database.h"
 #include "wiegand.h"
 
 #define D0_PIN 0
@@ -25,7 +24,11 @@ void main(void) {
   int i;
   
   wiegandInit(D0_PIN, D1_PIN);
+<<<<<<< HEAD
   //puts("Portunes (c) 2015 v0.0.1");
+=======
+//  puts("Portunes (c) 2015 v0.0.1");
+>>>>>>> e216a50d770004bbf5974fd594c92402ce160e4d
   
   while(1) {
     int bitLen = wiegandGetPendingBitCount();
@@ -46,17 +49,34 @@ void main(void) {
       char datahex2[50];
 
       //memcpy(datahex,data,bytes);
+<<<<<<< HEAD
       //printf("card no:");
+=======
+//      printf("card no:");
+>>>>>>> e216a50d770004bbf5974fd594c92402ce160e4d
       for (i = 0; i < bytes; i++){
 	
-	printf("%02X",data[i]);
+//	printf("%02X",data[i]);
 	sprintf(datahex +i*2,"%02X",data[i]);
 
       }
       
+<<<<<<< HEAD
       printf("\n");
       //exit(0);
 
+=======
+//      printf("\n");
+
+      //print bit card no
+      for (i = 0; i < bytes; i++)
+	printCharAsBinary(data[i]);
+      printf("\n");
+      
+      
+//      send_mysql_data(datahex);
+      
+>>>>>>> e216a50d770004bbf5974fd594c92402ce160e4d
     }
   }
 } 
