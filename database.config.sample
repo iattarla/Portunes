@@ -1,5 +1,0 @@
-door_name = "main_door"
-server = "localhost"
-user = "root"
-password = "123456"
-database = "portunes"
