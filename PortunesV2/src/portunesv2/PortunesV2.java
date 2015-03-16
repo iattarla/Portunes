@@ -15,7 +15,12 @@ import com.pi4j.component.lcd.impl.GpioLcdDisplay;
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.RaspiPin;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class PortunesV2 {
@@ -43,16 +48,35 @@ public class PortunesV2 {
         RaspiPin.GPIO_04, // LCD data bit 3
         RaspiPin.GPIO_01); // LCD data bit 4
         // provision gpio pins as input pins with its internal pull up resistor enabled
-        Wiegand wi = new Wiegand();
-        wi.begin();
+        //Wiegand wi = new Wiegand();
+        //wi.begin();
         lcd.clear();
+        
         
         System.out.println("get into while loop");
         while(true){
-            if(wi.available()){
-                lcd.write(LCD_ROW_1, String.valueOf(wi.getCode()) );
-                System.out.println(wi.getCode());
-            }
+            
+                
+                try {
+                    
+                    //System.out.println(wi.getCode());
+                    
+                    Process p = Runtime.getRuntime().exec("portunes-read");
+                    BufferedReader stdInput = new BufferedReader(new 
+                    InputStreamReader(p.getInputStream()));
+                    
+                    int exitVal = p.waitFor();
+                    String s = null;
+                    
+                    while ((s = stdInput.readLine()) != null) {
+                        System.out.println(s);
+                        lcd.write(LCD_ROW_1, s );
+                    }
+                    
+                } catch (IOException ex) {
+                    Logger.getLogger(PortunesV2.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            
         }
         
         // clear LCD
