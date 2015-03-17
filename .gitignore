@@ -40,3 +40,5 @@
 *.config
 >>>>>>> fa89b01ce78302a238c2c90180cc841621aa3d74
 /serialexample1/nbproject/private/
+/java/dist/
+/java/build/

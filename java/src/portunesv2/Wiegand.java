@@ -10,10 +10,14 @@ import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.io.gpio.PinEdge;
 import com.pi4j.io.gpio.PinPullResistance;
+import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 import static com.pi4j.wiringpi.Gpio.millis;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -28,7 +32,8 @@ public class Wiegand {
     long code=0;
     int bitCount=0;
     int	wiegandType=0;
-    
+    int bits = 0;
+    public static char[] s = new char[10000];
     ///
     long codehigh,codelow;
     
@@ -45,6 +50,8 @@ public class Wiegand {
     bitCount = 0;
     sysTick = millis();
 
+    
+    
     final GpioPinDigitalInput D0Pin = gpio.provisionDigitalInputPin(RaspiPin.GPIO_00, PinPullResistance.PULL_UP);
     final GpioPinDigitalInput D1Pin = gpio.provisionDigitalInputPin(RaspiPin.GPIO_07, PinPullResistance.PULL_UP);
     
@@ -58,18 +65,20 @@ public class Wiegand {
        
         @Override
         public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {        
-            bitCount++; // Increament bit count for Interrupt connected to D0
-            if (bitCount > 31){ // If bit count more than 31, process high bits 
-        
-                cardTempHigh |= ((0x80000000 & cardTemp)>>31); // shift value to high bits
-                cardTempHigh = 1;
-                cardTemp = 1;
-            }else{
             
-                cardTemp = 1; // D0 represent binary 0, so just left shift card data
+            if (D0Pin.isLow()) { // D1 on ground?
+                  
+                s[bits++] = '0';
+                
+                while (D0Pin.isLow()) {
+    
+                }
             }
-
-            lastWiegand = sysTick; // Keep track of last wiegand bit received      
+            if (bits == 26) {
+                bits=0;
+                Print();
+        
+            }
         }
         
     });
@@ -77,27 +86,37 @@ public class Wiegand {
     D1Pin.addListener(new GpioPinListenerDigital() {   
         
         @Override
-        public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {        
-            bitCount++; // Increment bit count for Interrupt connected to D1
-            
-            if (bitCount > 31){ // If bit count more than 31, process high bits
-
-
-                cardTempHigh |= ((0x80000000 & cardTemp)>>31); // shift value to high bits
-                cardTempHigh = 1;
-                cardTemp |= 1;
-                cardTemp =1;
-            }else{
-                
-                cardTemp |= 1; // D1 represent binary 1, so OR card data with 1 then
-                cardTemp = 1; // left shift card data
+        public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {     
+             
+            if (D1Pin.isLow()) { // D1 on ground?        
+                s[bits++] = '0';
+              
+                while (D1Pin.isLow()) {
+    
+                }
             }
-
-            lastWiegand = sysTick; // Keep track of last wiegand bit received        
-        }
+            if (bits == 26) {
+                bits=0;
+                Print();
         
+            }
+        }
+    
     });
-}
+
+    }
+    
+    void Print() {
+
+        for (int i = 0; i < 26; i++) {
+            System.out.write(s[i]);
+
+        }
+        System.out.println();
+        bits = 0;
+
+    }
+
     boolean available(){
         return DoWiegandConversion();
     }
