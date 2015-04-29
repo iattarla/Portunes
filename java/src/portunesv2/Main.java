@@ -13,7 +13,13 @@ package portunesv2;
 import com.pi4j.component.lcd.impl.GpioLcdDisplay;
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
+import com.pi4j.io.gpio.GpioPinDigitalInput;
+import com.pi4j.io.gpio.GpioPinDigitalOutput;
+import com.pi4j.io.gpio.PinPullResistance;
+import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
+import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
+import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -62,6 +68,35 @@ public class Main {
         RaspiPin.GPIO_04, // LCD data bit 3
         RaspiPin.GPIO_01); // LCD data bit 4
         
+        final GpioPinDigitalInput button1 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_12, PinPullResistance.PULL_DOWN);
+        final GpioPinDigitalInput button2 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_13, PinPullResistance.PULL_DOWN);
+        
+        /////button listeners
+        // create and register gpio pin listener
+        button1.addListener(new GpioPinListenerDigital() {
+            @Override
+            public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
+                // display pin state on console
+                
+                if(event.getState() == PinState.HIGH){
+                    System.out.println(" --> GPIO PIN STATE CHANGE: " + event.getPin() + " = " + event.getState());
+                }
+            }
+            
+        });
+        // create and register gpio pin listener
+        button2.addListener(new GpioPinListenerDigital() {
+            @Override
+            public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
+                // display pin state on console
+                if(event.getState() == PinState.HIGH){
+                    System.out.println(" --> GPIO PIN STATE CHANGE: " + event.getPin() + " = " + event.getState());
+                }
+            }
+            
+        });
+        //////////////////////777777
+        
         
         lcd.clear();
         
@@ -87,12 +122,14 @@ public class Main {
                     ft  = new SimpleDateFormat ("yyyy.MM.dd hh:mm:ss");
 
                     lcd.write(LCD_ROW_4,ft.format(date));
+                    lcd.write(LCD_ROW_1,"Welcome,Card please.");
                     
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
                         Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                    
                     
                 }
                 
@@ -112,8 +149,6 @@ public class Main {
                     String cardnoFull = null;
                     String cardnoBin = "";
                     
-                    //lcd.clear();
-                    
                     while ((cardnoFull = stdInput.readLine()) != null) {
                         //s = s.replace("\n", "").replace("\r", "");
                         
@@ -128,30 +163,26 @@ public class Main {
                         Door door = new Door();
                         
                         if(personel.Select(cardNo, "")){
-                            lcd.write(LCD_ROW_2,"                    ");
-                            
-                            //System.out.println("card_no: " + cardNo);
-                            //System.out.println("tarla_id: " + personel.tarla_id);
-                            
-                            ///////////7
                            
-                            //System.out.println(justdate_format.format(today_date));
-                        
-                        
                             if(door.Select(personel.tarla_id, (String) justdate_format.format(today_date) ) ) {
                                 System.out.println("shift bitis");
                                 lcd.write(LCD_ROW_2, "gulegule " + personel.firstname);
                                 door.ext_time = datetime_format.format(today_date);
                                 
                                 door.Update();
+                                Thread.sleep(2000);
+                                lcd.clear();
                             
                             }else{
                                 System.out.println("shift baslangic");
-                                lcd.write(LCD_ROW_2, "merhaba " + personel.firstname);
+                                lcd.write(LCD_ROW_2, "Merhaba " + personel.firstname);
                                 door.tarla_id = personel.tarla_id;
                                 door.ent_time = datetime_format.format(today_date);
                                 door.ext_time = "0000-00-00 00:00:00";
                                 door.Create();
+                                Thread.sleep(2000);
+                                lcd.clear();
+                                
                             }  
                         
                             
@@ -160,6 +191,8 @@ public class Main {
                             System.out.println("yanlış kart " + cardNo);
                             lcd.clear(LCD_ROW_2);
                             lcd.write(LCD_ROW_2, "yanlis kart!");
+                            lcd.clear();
+                            
                         }
                         
                         
