@@ -1,0 +1,2 @@
+cd /root/Portunes/java/dist
+java -jar PortunesV2.jar

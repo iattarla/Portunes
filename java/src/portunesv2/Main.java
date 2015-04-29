@@ -33,10 +33,25 @@ public class Main {
     public final static int LCD_COLUMNS = 20;
     public final static int LCD_BITS = 4;
     
-   
+    
+    
+    Main(){
+        
+        
+        
+        
+    }
+    
     
     public static void main(String args[]) throws InterruptedException {
 
+        Date today_date = new Date( );            
+        SimpleDateFormat justdate_format;
+        SimpleDateFormat datetime_format;
+        
+        justdate_format  = new SimpleDateFormat ("yyyy-MM-dd");
+        datetime_format  = new SimpleDateFormat ("yyyy-MM-dd hh:mm:ss");
+        
         final GpioController gpio = GpioFactory.getInstance();
         // initialize LCD
         final GpioLcdDisplay lcd = new GpioLcdDisplay(LCD_ROWS,LCD_COLUMNS, // number of columns supported by LCD
@@ -60,6 +75,7 @@ public class Main {
         lcd.clear();
         
         lcd.write(LCD_ROW_1,"Welcome,Card please.");
+        Thread.sleep(1000);
         
         
         new Thread("date"){        
@@ -96,7 +112,7 @@ public class Main {
                     String cardnoFull = null;
                     String cardnoBin = "";
                     
-                    lcd.clear();
+                    //lcd.clear();
                     
                     while ((cardnoFull = stdInput.readLine()) != null) {
                         //s = s.replace("\n", "").replace("\r", "");
@@ -108,13 +124,51 @@ public class Main {
                         long card_no = Long.parseLong(cardnoBin, 2);
                         String cardNo = String.valueOf(card_no);
                         
-                        lcd.write(LCD_ROW_1, cardNo );
+                        Personnel personel = new Personnel();
+                        Door door = new Door();
+                        
+                        if(personel.Select(cardNo, "")){
+                            lcd.write(LCD_ROW_2,"                    ");
+                            
+                            //System.out.println("card_no: " + cardNo);
+                            //System.out.println("tarla_id: " + personel.tarla_id);
+                            
+                            ///////////7
+                           
+                            //System.out.println(justdate_format.format(today_date));
+                        
+                        
+                            if(door.Select(personel.tarla_id, (String) justdate_format.format(today_date) ) ) {
+                                System.out.println("shift bitis");
+                                lcd.write(LCD_ROW_2, "gulegule " + personel.firstname);
+                                door.ext_time = datetime_format.format(today_date);
+                                
+                                door.Update();
+                            
+                            }else{
+                                System.out.println("shift baslangic");
+                                lcd.write(LCD_ROW_2, "merhaba " + personel.firstname);
+                                door.tarla_id = personel.tarla_id;
+                                door.ent_time = datetime_format.format(today_date);
+                                door.ext_time = "0000-00-00 00:00:00";
+                                door.Create();
+                            }  
+                        
+                            
+                        }else{
+                             lcd.write(LCD_ROW_2,"                    ");
+                            System.out.println("yanlış kart " + cardNo);
+                            lcd.clear(LCD_ROW_2);
+                            lcd.write(LCD_ROW_2, "yanlis kart!");
+                        }
+                        
                         
                         //send card_No to the server
                     }
                     
                 } catch (IOException ex) {
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    
                 }
             
         }
