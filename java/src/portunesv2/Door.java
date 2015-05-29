@@ -153,7 +153,7 @@ public class Door {
         try {
             con = (Connection) DriverManager.getConnection(db_url, db_user, db_password);
             st = (Statement) con.createStatement();    
-            rs = st.executeQuery("SELECT * FROM " + db_table + " WHERE date(ent_time) = '" + search_ent_time + "' and tarla_id = '"+search_tarla_id+"' ");
+            rs = st.executeQuery("SELECT * FROM " + db_table + " WHERE date(ent_time) = '" + search_ent_time + "' and tarla_id = '"+search_tarla_id+"' and ext_time = '0000-00-00 00:00:00' ");
 
 
                     if (rs.next()) {
