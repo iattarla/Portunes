@@ -14,7 +14,6 @@ import com.pi4j.component.lcd.impl.GpioLcdDisplay;
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
-import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
@@ -56,7 +55,7 @@ public class Main {
         SimpleDateFormat datetime_format;
         
         justdate_format  = new SimpleDateFormat ("yyyy-MM-dd");
-        datetime_format  = new SimpleDateFormat ("yyyy-MM-dd hh:mm:ss");
+        datetime_format  = new SimpleDateFormat ("yyyy-MM-dd kk:mm:ss");
         
         final GpioController gpio = GpioFactory.getInstance();
         // initialize LCD
@@ -95,12 +94,14 @@ public class Main {
             }
             
         });
-        //////////////////////777777
+        //////////////////////
         
         
         lcd.clear();
         
         lcd.write(LCD_ROW_2,"Portunes V2 by TARLA");
+        System.out.println("Portunes V2 by TARLA");
+        
         try {        
             Thread.sleep(1000);            
         } catch (InterruptedException ex) {        
@@ -109,7 +110,7 @@ public class Main {
         
         lcd.clear();
         
-        lcd.write(LCD_ROW_1,"Welcome,Card please.");
+        lcd.write(LCD_ROW_1,"kartinizi okutunuz.");
         Thread.sleep(1000);
         
         
@@ -119,10 +120,10 @@ public class Main {
                 while(true){   
                     Date date = new Date( );            
                     SimpleDateFormat ft;
-                    ft  = new SimpleDateFormat ("yyyy.MM.dd hh:mm:ss");
+                    ft  = new SimpleDateFormat ("yyyy.MM.dd kk:mm:ss");
 
                     lcd.write(LCD_ROW_4,ft.format(date));
-                    lcd.write(LCD_ROW_1,"Welcome,Card please.");
+                    lcd.write(LCD_ROW_1,"kartinizi okutunuz.");
                     
                     try {
                         Thread.sleep(1000);
@@ -144,6 +145,8 @@ public class Main {
                     Process p = Runtime.getRuntime().exec("portunes-read"); // portunes read wiedgard command
                     BufferedReader stdInput = new BufferedReader(new 
                     InputStreamReader(p.getInputStream()));
+                    //System.out.println("portunes read");
+                    
                     
                     int exitVal = p.waitFor();
                     String cardnoFull = null;
@@ -151,20 +154,24 @@ public class Main {
                     
                     while ((cardnoFull = stdInput.readLine()) != null) {
                         //s = s.replace("\n", "").replace("\r", "");
+                       // System.out.println(cardnoFull);
                         
                         for(int a=1;a<25;a++){ // get data without checksum
                             cardnoBin = cardnoBin + cardnoFull.charAt(a);
                         } 
                         
                         long card_no = Long.parseLong(cardnoBin, 2);
+                        card_no++;
                         String cardNo = String.valueOf(card_no);
                         
                         Personnel personel = new Personnel();
                         Door door = new Door();
                         
-                        if(personel.Select(cardNo, "")){
+                        System.out.println("card no:"+card_no +"  " +  cardnoBin);
+                        int user_status;
+                        if(personel.Select(cardNo)){
                            
-                            if(door.Select(personel.tarla_id, (String) justdate_format.format(today_date) ) ) {
+                            if((user_status = door.Select(personel.user_id, (String) justdate_format.format(today_date) )) == 1 ) {
                                 System.out.println("shift bitis");
                                 lcd.write(LCD_ROW_2, "gulegule " + personel.firstname);
                                 door.ext_time = datetime_format.format(today_date);
@@ -173,24 +180,30 @@ public class Main {
                                 Thread.sleep(2000);
                                 lcd.clear();
                             
-                            }else{
+                            }else if(user_status == 2){
                                 System.out.println("shift baslangic");
                                 lcd.write(LCD_ROW_2, "Merhaba " + personel.firstname);
-                                door.tarla_id = personel.tarla_id;
+                                door.user_id = personel.user_id;
                                 door.ent_time = datetime_format.format(today_date);
                                 door.ext_time = "0000-00-00 00:00:00";
                                 door.Create();
                                 Thread.sleep(2000);
                                 lcd.clear();
                                 
-                            }  
+                            }else if(user_status == 5){
+                                System.out.println("zaten cikis yapmis");
+                                lcd.write(LCD_ROW_2,personel.firstname + " ciktin zaten.");
+                                Thread.sleep(2000);
+                                lcd.clear();
+                            }
                         
                             
                         }else{
                              lcd.write(LCD_ROW_2,"                    ");
                             System.out.println("yanlış kart " + cardNo);
                             lcd.clear(LCD_ROW_2);
-                            lcd.write(LCD_ROW_2, "yanlis kart!");
+                            lcd.write(LCD_ROW_2, "yanlis kart "+ cardNo);
+                            Thread.sleep(2000);
                             lcd.clear();
                             
                         }

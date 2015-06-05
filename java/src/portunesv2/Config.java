@@ -42,7 +42,7 @@ public class Config {
         db_user = prop.getProperty("db_user");
         db_domain = prop.getProperty("db_domain");
         
-        
+        System.out.println("user:"+db_user+"@"+db_name+db_domain);
     }
     public void Update(){
         
@@ -56,7 +56,7 @@ public class Config {
                 prop.setProperty("db_domain",db_domain);
                 
     		//save properties to project root folder
-    		prop.store(new FileOutputStream("config.properties"), null);
+    		prop.store(new FileOutputStream("portunes.conf"), null);
  
             } catch (IOException ex) {
                 System.out.println(ex);

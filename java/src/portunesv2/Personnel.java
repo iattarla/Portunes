@@ -19,7 +19,7 @@ import java.util.Date;
 public class Personnel {
  
    String tc_no = "";
-   String tarla_id = "";
+   String user_id = "";
    String card_no = "";
    String login = "";
    String firstname = "";
@@ -36,44 +36,56 @@ public class Personnel {
 
    Config config = new Config();
     
-   private final String db_domain = config.db_domain;        //"localhost:3307";
+   private final String db_domain = config.db_domain;   
    private final String db_url = "jdbc:mysql://" + config.db_domain + "/"+config.db_name;                 //"jdbc:mysql://" + db_domain + "/saglamdis"; // 192.241.172.225:3306
-   private final String db_user = config.db_user;           //"saglamdisuser";
-   private final String db_password = "super_251";
+   private final String db_user = config.db_user;           
+   private final String db_password = "*m2_minered";
     
    private final String db_table = "users";
    
    
-   public boolean Select(String search_card_no,String search_tarla_id){
+   public boolean Select(String search_card_no){
        
+       int customized_id;
         
         if(!"".equals(search_card_no)){
             
-        
+        System.out.println(db_url);
         try {
                     con = (Connection) DriverManager.getConnection(db_url, db_user, db_password);
                     st = (Statement) con.createStatement();
-                    rs = st.executeQuery("SELECT * FROM " + db_table + " where card_no = '" + search_card_no + "'");
+                    rs = st.executeQuery("SELECT customized_id FROM minered.custom_values where value = '" + search_card_no + "' AND custom_field_id = 3 ");
 
 
                     if (rs.next()) {
-                        
-                            tc_no = rs.getString("tc_no");
-                            tarla_id = rs.getString("tarla_id");
-                            card_no = rs.getString("card_no");
-                            login = rs.getString("login");
-                            firstname = rs.getString("firstname");
-                            lastname = rs.getString("lastname");
-                            mail = rs.getString("mail");
-                            created_on = rs.getDate("created_on");
-                            type = rs.getString("type");
-                            
-                            return true;
-                           
+                            customized_id = rs.getInt("customized_id");
+                            System.out.println("custom id " + customized_id);
                     }else{// cant find any record!
                         return false;
                     }
                   
+                    rs = st.executeQuery("SELECT * FROM users WHERE id = " + customized_id + " ");
+                    
+                    if (rs.next()) {
+                            login = rs.getString("login");
+                            firstname = rs.getString("firstname");
+                            lastname = rs.getString("lastname");
+                            created_on = rs.getDate("created_on");
+                            type = rs.getString("type");
+                            System.out.println("user " + login + " " + firstname + " " + lastname);
+                    }else{// cant find any record!
+                        return false;
+                    }
+                    
+                    rs = st.executeQuery("SELECT value FROM custom_values WHERE customized_id = " + customized_id + " AND custom_field_id = 1 ");
+                    
+                    if (rs.next()) {
+                            user_id = rs.getString("value");
+                            return true;
+                    }else{// cant find any record!
+                        return false;
+                    }
+                    
                 } catch (SQLException ex) {
                     System.out.println(ex);
                     Exception exception = new Exception(ex,this.getClass().toString()); // mail ile hata bildirimi
@@ -96,58 +108,8 @@ public class Personnel {
                     }
                 }   
                 
-        }else{
-            
-            try {
-                    con = (Connection) DriverManager.getConnection(db_url, db_user, db_password);
-                    st = (Statement) con.createStatement();
-                    rs = st.executeQuery("SELECT * FROM " + db_table + " where tarla_id = '"+ search_tarla_id + "' ;");
-
-
-                    if (rs.next()) {
-                        
-                            tc_no = rs.getString("tc_no");
-                            tarla_id = rs.getString("tarla_id");
-                            login = rs.getString("login");
-                            firstname = rs.getString("firstname");
-                            lastname = rs.getString("lastname");
-                            mail = rs.getString("mail");
-                            created_on = rs.getDate("created_on");
-                            type = rs.getString("type");
-                            
-                            return true;
-                           
-                    }else{ // cant find any record!
-                        return false;
-                    }
-                  
-                } catch (SQLException ex) {
-                    System.out.println(ex);
-                    Exception exception = new Exception(ex,this.getClass().toString()); // mail ile hata bildirimi
-                } finally {
-                    
-                    try {
-                        if (rs != null) {
-                            rs.close();
-                        }
-                        if (st != null) {
-                           st.close();
-                        }
-                        if (con != null) {
-                            con.close();
-                        }
-
-                    } catch (SQLException ex) {
-                        System.out.println(ex);    
-                        Exception exception = new Exception(ex,this.getClass().toString()); // mail ile hata bildirimi
-                    }
-                } 
-            
-            
-            
-            
-            
-        }      
+        }
+        
           return false;     
 }
 }
