@@ -38,8 +38,6 @@ public class Main {
     public final static int LCD_COLUMNS = 20;
     public final static int LCD_BITS = 4;
     
-    
-    
     Main(){
         
         
@@ -50,7 +48,7 @@ public class Main {
     
     public static void main(String args[]) throws InterruptedException {
 
-        Date today_date = new Date( );            
+        //Date today_date = new Date( );            
         SimpleDateFormat justdate_format;
         SimpleDateFormat datetime_format;
         
@@ -155,7 +153,7 @@ public class Main {
                     while ((cardnoFull = stdInput.readLine()) != null) {
                         //s = s.replace("\n", "").replace("\r", "");
                        // System.out.println(cardnoFull);
-                        
+                        Date today_date = new Date( );            
                         for(int a=1;a<25;a++){ // get data without checksum
                             cardnoBin = cardnoBin + cardnoFull.charAt(a);
                         } 
@@ -205,6 +203,7 @@ public class Main {
                             lcd.write(LCD_ROW_2, "yanlis kart "+ cardNo);
                             Thread.sleep(2000);
                             lcd.clear();
+                            Exception exception = new Exception("yanlış kart " + cardNo + "\n" + datetime_format.format(today_date)); // mail ile hata bildirimi
                             
                         }
                         
@@ -214,7 +213,7 @@ public class Main {
                     
                 } catch (IOException ex) {
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                    
+                     
                 }
             
         }

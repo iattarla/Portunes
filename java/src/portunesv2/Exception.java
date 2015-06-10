@@ -23,8 +23,8 @@ import javax.mail.internet.MimeMessage;
  * @author gunebakan
  */
 public class Exception {
-    private final String from_mail= "ufakisleratolyesi@gmail.com";;
-    private final String from_password = "oncupiknik";
+    private final String from_mail= "indico@tarla.org.tr";;
+    private final String from_password = "telesis5001";
     private final String to_mail = "bilaltonga@gmail.com";
     private final String to_subject = "Portunes Exception";
     
@@ -113,6 +113,24 @@ public class Exception {
 
         
     }
+        
+    public Exception(String error_class){
+        sendEmail("Portunes programı bir hata yürüttü.Lütfen kullanıcı ile iletişime geçin\n"+
+                  "hata bilgileri aşağıdadır.\n\n" +
+                "--------------------------\n"+
+                error_class + "\n" +
+                "--------------------------\n\n"+
+                  "Exception type: Wrong id card\n" +
+                "--------------------------\n\n"+
+                
+                "\n\n\n" +
+                "--------------------------\n"+
+                "bu bir robot maildir."
+        
+        );
+
+        
+    }
     
     private boolean sendEmail(String to_message){
         
@@ -121,7 +139,7 @@ public class Exception {
         Properties props = new Properties();
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.host", "smtp.yandex.com");
         props.put("mail.smtp.port", "587");
 
         Session session = Session.getInstance(props,
@@ -134,7 +152,7 @@ public class Exception {
         try {
 
             Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress("bilal@ufakisler.net"));
+            message.setFrom(new InternetAddress("indico@tarla.org.tr"));
             message.setRecipients(Message.RecipientType.TO,
                 InternetAddress.parse(to_mail));
             message.setSubject(to_subject + " - portunes_door");
