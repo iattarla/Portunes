@@ -39,7 +39,7 @@ public class Personnel {
    private final String db_domain = config.db_domain;   
    private final String db_url = "jdbc:mysql://" + config.db_domain + "/"+config.db_name;                 //"jdbc:mysql://" + db_domain + "/saglamdis"; // 192.241.172.225:3306
    private final String db_user = config.db_user;           
-   private final String db_password = "*m2_minered";
+   private final String db_password = "123456";
     
    private final String db_table = "users";
    
