@@ -23,9 +23,9 @@ import javax.mail.internet.MimeMessage;
  * @author gunebakan
  */
 public class Exception {
-    private final String from_mail= "indico@tarla.org.tr";;
-    private final String from_password = "telesis5001";
-    private final String to_mail = "bilaltonga@gmail.com";
+    private final String from_mail= "info@mail.com";;
+    private final String from_password = "123456";
+    private final String to_mail = "info@mail.com";
     private final String to_subject = "Portunes Exception";
     
     public Exception(Exception ex,String error_class){
